@@ -6,3 +6,4 @@
 *.pdf
 *.lock
 .spack-env/
+*.f32
