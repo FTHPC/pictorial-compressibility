@@ -16,11 +16,9 @@ def main():
         if files.endswith('.tif'):
             input_file_full = input_folder+files
             Vx = plt.imread(input_file_full)
-        
 
-
-    
-
+        f = open(input_file_full+".f32", "wb")
+        f.write(Vx)
 
 if __name__ == "__main__":
     main()

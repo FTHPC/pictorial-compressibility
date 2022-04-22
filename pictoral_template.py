@@ -29,7 +29,7 @@ import os
 #globals to easily manipulate functionality of template
 input_folder=str(Path(__file__).parent.absolute())+"/datasets/LA-UR-21-32202/raw/"
 #dtype of images
-output_file = "teststats.csv"
+output_file = "stats.csv"
 #compressors to be ran                    
 compressor_list = ["sz", "zfp"]
 metrics_keys = [
@@ -65,10 +65,13 @@ def make_config(compressor_id: str, bound: float, dtype: str):
 
 
 
-def run_compressors(input_data, dtype: str, compressors: list, start=-1, stop=-1):
-    decomp_data = input_data.copy()
+def run_compressors(input_data, dtype: str, compressors: list, start=-3, stop=-1):
+    if dtype == "byte":
+        decomp_data = input_data
+    else:
+        decomp_data = input_data.copy()
     try:
-        for compressor_id, bound in itertools.product(compressors, [.5, 1]):
+        for compressor_id, bound in itertools.product(compressors, np.logspace(start=start, stop=stop, num=-1*(start-stop-1))):
             compressor = libpressio.PressioCompressor.from_config({
                 # configure which compressor to use
                 "compressor_id": compressor_id,
@@ -126,10 +129,16 @@ def main():
         print(files)
         if files.startswith('.'):
             continue
-        if files.endswith('.tif'):
+        if files.endswith('.f32'):
             input_file_full = input_folder+files
-            Vx = plt.imread(input_file_full)
-            run_compressors(Vx, Vx.dtype, compressor_list)
+            f = open(input_file_full, "rb")
+            Vx = f.read()
+            num_shape = np.frombuffer(Vx, dtype=float);
+            run_compressors(num_shape, 'float64', compressor_list)
+        # if files.endswith('.tif'):
+        #     input_file_full = input_folder+files
+        #     Vx = plt.imread(input_file_full)
+        #     run_compressors(Vx, Vx.dtype, compressor_list)
     
 
 
